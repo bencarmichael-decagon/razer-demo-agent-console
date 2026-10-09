@@ -14,9 +14,8 @@ Scenario 3 (spotting a known defect, so troubleshooting is skipped) with Scenari
 ## Before the demo
 
 ### Have ready
-- **Photo 1:** the severed cable with the mouse visible.
-- **Photo 2:** a close-up of the serial label.
-- *(Optional)* A 5–10 second video of the cut cable. The instructions ask for one, but the evidence tool doesn't check files, so two photos are enough.
+- **Photo 1:** the cut cable with the mouse visible.
+- **Photo 2:** a close-up of the serial label (`RZ01-0430-1234`).
 - Save them on the desktop so they're quick to drag in.
 
 ### Screen layout
@@ -43,14 +42,14 @@ Lines in `code` are typed exactly as shown. "AI" lines are what the agent should
 | 1 | Chat | `Hi, my Razer Viper V3 Pro right-click isn't working` | AI identifies the **Razer Viper V3 Pro** and checks known issues. | "One message. The agent identifies the exact product and checks it against Razer's known-defect list." |
 | 2 | Chat | *(AI)* | AI says this is a **recognised right-click switch defect (batch 2024Q3)**, so no troubleshooting is needed, and asks for the serial and purchase date. | **The key moment.** "Haikal mentioned certain models have known problems, and Razer replaces those straight away without 10 troubleshooting steps. That just saved this customer about 15 minutes, and saved Razer an agent's time." |
 | 3 | Chat | `Serial is RZ01-0430-1234, I bought it in March 2026` | AI records them and asks where the customer is located. | — |
-| 4 | Chat | `I'm in Sydney, Australia` | Warranty is **valid** and a replacement is eligible. Because the customer is in AU, the AI explains the **cut-cord process** and asks them to agree. | "The agent applies the APAC policy automatically. In this region, Razer needs the old unit destroyed before shipping a replacement." |
+| 4 | Chat | `I'm in Sydney, Australia` | Warranty is **valid**. The AI says "good news, you're covered for a free replacement" and gives the shipping estimate, without mentioning returns. It then explains that in Australia you **don't post the old mouse back**: you cut the cable and send two photos, a Razer specialist reviews them, and you're asked whether you're happy to go ahead. | "The agent applies the APAC policy automatically, and frames it as the easy option: no trip to the post office." |
 
 ### Act 2: cut-cord evidence and handoff (~1.5 min)
 
 | # | Where | Do / type | What should happen | Talking point |
 |---|---|---|---|---|
-| 5 | Chat | `Yes, happy to do that` | AI sends the cut-cord instructions: cut the cable, take a photo with the device visible, show the serial, and take a short video. | — |
-| 6 | Chat | **Upload Photo 1 and Photo 2**, then type `Done, here's the cut cable and the serial label` | AI submits the evidence and gives an **evidence ticket (EVD-…)**. Then the handoff message appears: *"I've passed your evidence to a Razer specialist for review. They'll be with you shortly."* | "This is the one step that needs human judgement: is the cord really destroyed? Everything up to here was automated." |
+| 5 | Chat | `Yes, happy to do that` | AI sends short instructions: cut through the cable, then **Photo 1** of the cut cable with the mouse visible and **Photo 2** of the serial label. No video. | — |
+| 6 | Chat | **Upload Photo 1 and Photo 2**, then type `Done, here's the cut cable and the serial label` | **One** handoff message: *"Thanks! I've shared your photos with a Razer specialist for review (ticket EVD-2026-…). They usually review within 5-10 minutes and will update you right here in this chat."* | "This is the one step that needs human judgement: is the cord really destroyed? Everything up to here was automated." |
 | 7 | Console | *(watch the sidebar)* | **Within about 3 seconds** a new case appears, marked **With human**. Click it. | "Here's the specialist's view. Nobody had to read the transcript." |
 | 8 | Console | *(point at the right-hand panel)* | Case details are filled in: product, model, serial, region, warranty, issue, evidence ticket, the **photos** and an **AI summary**. | "Full context in one place: what's wrong, warranty status, region and the evidence. The specialist can decide in seconds." |
 
@@ -96,7 +95,11 @@ Lines in `code` are typed exactly as shown. "AI" lines are what the agent should
 ---
 
 ## Known quirks
-- **Two messages at handoff.** The Cut Cord AOP says "evidence submitted, ticket EVD-…", then the tool says "passed to a specialist". Both make sense, so this is left as is.
+Fixed after the first rehearsal (on `initial-build`, commits `d03a8d1` and `18e6de4`):
+- The AI no longer asks the customer to "confirm the approved warranty replacement".
+- Cut-cord is framed as the simpler option ("no need to post it back"), with no "return shipping isn't practical" line and no prepaid-label mention for AU/SG.
+- Evidence is two photos only, with no video.
+- A single handoff message includes the ticket, "usually within 5-10 minutes" and "updates right here in this chat". Evidence tickets use the current year.
 
 Fixed in `initiate_replacement` (on `initial-build`, commit `5d0640f`):
 - Cut-cord (AU/SG) confirmations no longer mention a return label (`return_label_sent: false`).
