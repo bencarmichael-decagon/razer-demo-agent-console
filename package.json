@@ -1,0 +1,19 @@
+{
+  "name": "razer-site",
+  "private": true,
+  "type": "module",
+  "description": "Razer demo: human agent UI that pairs with a Decagon chat widget",
+  "scripts": {
+    "dev": "netlify dev",
+    "deploy": "netlify deploy --prod"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.38.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

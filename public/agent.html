@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Razer Support — Agent Console</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <span class="brand">RAZER</span>
+    <h1>Agent Console</h1>
+    <span class="spacer"></span>
+    <span id="connection" class="pill">Checking…</span>
+    <button id="reset" class="danger" title="Delete all stored conversations">Clear all</button>
+  </header>
+
+  <main>
+    <aside>
+      <div class="aside-head">
+        <span>Conversations</span>
+        <span id="count"></span>
+      </div>
+      <ul id="conversation-list"></ul>
+    </aside>
+
+    <div id="detail">
+      <div class="placeholder">Select a conversation</div>
+    </div>
+  </main>
+
+  <div id="toast"></div>
+  <script src="/agent.js"></script>
+</body>
+</html>
