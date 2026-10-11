@@ -25,6 +25,15 @@ Site configuration > Environment variables.
 | `DECAGON_WEBHOOK_MODULE_ID` | to send to Decagon | ID of the On Webhook Event custom integration. Leave blank for local-only mode |
 | `WEBHOOK_SHARED_SECRET` | yes | Any long random string. Decagon sends it in the `X-Webhook-Secret` header; store the same value as a Decagon secret |
 
+Outbound call button (optional):
+
+| Variable | Required | What it is |
+|---|---|---|
+| `OUTBOUND_MISSION_ID` | to enable the button | Campaign ID (`msn_…`) from Outbound → Campaigns → Configuration |
+| `DEMO_CALL_NUMBER` | no | Number called when the phone field is blank, e.g. `+14153479671`. Only a masked version is shown in the UI |
+| `DEMO_FIRST_NAME` | no | Pre-fills the name field (default `Ben`) |
+| `DECAGON_PHONE_NUMBER` | no | Caller number (E.164). If unset, the campaign's configured number is used |
+
 With `DECAGON_WEBHOOK_MODULE_ID` blank, replies, approvals and closes are recorded
 in the console but not sent to Decagon. The header pill shows which mode you're in.
 
@@ -44,6 +53,13 @@ Called by the console (server-side functions forward to Decagon with the Bearer 
 | `POST /api/reply` `{ conversation_id, text }` | `{ action: "agent_reply", conversation_id, text }` |
 | `POST /api/approve` `{ conversation_id, reviewer_notes? }` | `{ action: "approve_evidence", conversation_id, decision: "approved", reviewer_notes }` |
 | `POST /api/close` `{ conversation_id, closing_message?, resolution_summary? }` | `{ action: "close_conversation", conversation_id, closing_message, resolution_summary }` |
+
+Outbound: `POST /api/trigger-call` `{ conversation_id, first_name?, phone? }` enrols the
+customer in the outbound campaign via `POST {DECAGON_BASE_URL}/mission_user/external/batch`.
+It works on any conversation (demo-only). Metadata uses the same `escalation_*` keys as the
+chat flow, plus `first_name`, `outbound_reason: "evidence_approved_follow_up"` and
+`evidence_review_status: "approved"`. Missing case details fall back to the Viper V3 Pro demo
+values. `user_id` is `<conversation_id>-<timestamp>` so each demo call is unique.
 
 Relay: when a customer message reaches `/api/user-message` for a conversation that's
 back with the AI (after Approve), the site sends `{ action: "resume_ai", conversation_id }`

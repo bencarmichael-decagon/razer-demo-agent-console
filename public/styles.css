@@ -129,6 +129,10 @@ dl.kv dd { margin: 0; word-break: break-word; }
   width: 100%; min-height: 60px; padding: 8px; border-radius: 6px; resize: vertical;
   border: 1px solid var(--border); background: var(--panel-2); color: var(--text); font: inherit; font-size: 13px;
 }
+.actions input.field {
+  width: 100%; padding: 8px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--panel-2); color: var(--text); font: inherit; font-size: 13px;
+}
 .hint { font-size: 12px; color: var(--muted); line-height: 1.4; }
 .placeholder { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--muted); }
 

@@ -6,6 +6,7 @@ const state = {
   selectedId: new URLSearchParams(location.search).get("id"),
   selected: null,
   busy: false,
+  config: {},
 };
 
 const $ = (sel) => document.querySelector(sel);
@@ -109,6 +110,8 @@ function renderDetail() {
   const draft = $("#reply-text")?.value ?? "";
   const notesDraft = $("#review-notes")?.value ?? "";
   const closeDraft = $("#closing-message")?.value ?? "";
+  const callName = $("#call-name")?.value || state.config.demoFirstName || "";
+  const callPhone = $("#call-phone")?.value ?? "";
   const threadEl = $("#thread");
   const atBottom = !threadEl || threadEl.scrollHeight - threadEl.scrollTop - threadEl.clientHeight < 40;
 
@@ -163,6 +166,18 @@ function renderDetail() {
       </section>
 
       <section>
+        <h3>Outbound call</h3>
+        <div class="actions">
+          <input id="call-name" class="field" placeholder="First name" />
+          <input id="call-phone" class="field" placeholder="${escapeHtml(state.config.demoCallNumberMasked ? `Default: ${state.config.demoCallNumberMasked}` : "Phone, e.g. (415) 347-9671")}" />
+          <button class="primary" id="call" ${state.config.outboundConfigured ? "" : "disabled"}>Call customer to complete replacement</button>
+          <span class="hint">${state.config.outboundConfigured
+            ? "The AI calls, confirms the approval and delivery address, and creates the order."
+            : "Set OUTBOUND_MISSION_ID in Netlify to enable."}</span>
+        </div>
+      </section>
+
+      <section>
         <h3>Resolve</h3>
         <div class="actions">
           <textarea id="closing-message" placeholder="Closing message to customer (optional — uses the default if blank)" ${c.status === "closed" ? "disabled" : ""}></textarea>
@@ -174,6 +189,8 @@ function renderDetail() {
   $("#reply-text").value = draft;
   $("#review-notes").value = notesDraft;
   $("#closing-message").value = closeDraft;
+  $("#call-name").value = callName;
+  $("#call-phone").value = callPhone;
   const t = $("#thread");
   if (atBottom) t.scrollTop = t.scrollHeight;
 }
@@ -252,6 +269,11 @@ $("#detail").addEventListener("click", (e) => {
     const notes = $("#review-notes").value;
     act(() => api("approve", { conversation_id: state.selectedId, reviewer_notes: notes }), "Approved — AI is taking over");
   }
+  if (e.target.id === "call") {
+    const first_name = $("#call-name").value;
+    const phone = $("#call-phone").value;
+    act(() => api("trigger-call", { conversation_id: state.selectedId, first_name, phone }), "Calling the customer…");
+  }
   if (e.target.id === "close") {
     const closing = $("#closing-message").value;
     act(() => api("close", { conversation_id: state.selectedId, closing_message: closing }), "Conversation closed");
@@ -267,6 +289,8 @@ $("#reset").addEventListener("click", async () => {
 // ---------- boot ----------
 
 api("status").then((s) => {
+  state.config = s;
+  renderDetail();
   const el = $("#connection");
   el.textContent = s.decagonConnected ? "Connected to Decagon AU" : "Local only — Decagon not configured";
   el.className = `pill ${s.decagonConnected ? "ok" : "warn"}`;
