@@ -7,6 +7,10 @@ import { addMessage, getConversation, json, readJson, saveConversation } from ".
 const CUSTOMER_CONTACT = {
   first_name: "Ben",
   phone: "+14153479671",
+  // Optional in the API spec (US only): the recipient's country and state, so Decagon
+  // knows where the recipient is. 415 is a California area code.
+  country_code: "US",
+  subdivision_code: "US-CA",
 };
 
 // Decagon-provisioned caller number. The batch API requires it per user
@@ -47,6 +51,8 @@ export default async (req) => {
     target,
     target_type: "PHONE",
     decagon_phone_number: DECAGON_CALLER_NUMBER,
+    recipient_country_code: CUSTOMER_CONTACT.country_code,
+    recipient_subdivision_code: CUSTOMER_CONTACT.subdivision_code,
     metadata: {
       outbound_reason: "evidence_approved_follow_up",
       first_name: firstName,
@@ -78,7 +84,12 @@ export default async (req) => {
     return json({ error: `Decagon outbound returned ${res.status}: ${detail.slice(0, 300)}` }, 502);
   }
 
-  addMessage(conv, "system", `Outbound call requested to ${target} (${firstName})`);
+  // Response: { created_mission_users: [{ id, mission_id, target, ... }] }
+  const data = await res.json().catch(() => ({}));
+  const missionUserId = data.created_mission_users?.[0]?.id;
+
+  addMessage(conv, "system",
+    `Outbound call requested to ${target} (${firstName})${missionUserId ? `, campaign target ${missionUserId}` : ""}`);
   await saveConversation(conv);
-  return json({ ok: true, target });
+  return json({ ok: true, target, mission_user_id: missionUserId ?? null });
 };
