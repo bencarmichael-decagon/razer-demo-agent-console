@@ -11,6 +11,9 @@ const state = {
 
 const $ = (sel) => document.querySelector(sel);
 
+// Display copy of the customer record the call uses (see netlify/functions/trigger-call.mjs).
+const CUSTOMER_CONTACT = { name: "Ben", phone: "+1 (415) 347-9671" };
+
 const STATUS_LABEL = { with_human: "With human", with_ai: "Back with AI", closed: "Closed" };
 
 const CONTEXT_FIELDS = [
@@ -110,8 +113,6 @@ function renderDetail() {
   const draft = $("#reply-text")?.value ?? "";
   const notesDraft = $("#review-notes")?.value ?? "";
   const closeDraft = $("#closing-message")?.value ?? "";
-  const callName = $("#call-name")?.value || state.config.demoFirstName || "";
-  const callPhone = $("#call-phone")?.value ?? "";
   const threadEl = $("#thread");
   const atBottom = !threadEl || threadEl.scrollHeight - threadEl.scrollTop - threadEl.clientHeight < 40;
 
@@ -166,10 +167,13 @@ function renderDetail() {
       </section>
 
       <section>
-        <h3>Outbound call</h3>
+        <h3>Customer contact</h3>
+        <dl class="kv" style="margin-bottom:10px">
+          <dt>Name</dt><dd>${escapeHtml(CUSTOMER_CONTACT.name)}</dd>
+          <dt>Phone</dt><dd>${escapeHtml(CUSTOMER_CONTACT.phone)}</dd>
+          <dt>Preferred</dt><dd>Phone call</dd>
+        </dl>
         <div class="actions">
-          <input id="call-name" class="field" placeholder="First name" />
-          <input id="call-phone" class="field" placeholder="${escapeHtml(state.config.demoCallNumberMasked ? `Default: ${state.config.demoCallNumberMasked}` : "Phone, e.g. (415) 347-9671")}" />
           <button class="primary" id="call" ${state.config.outboundConfigured ? "" : "disabled"}>Call customer to complete replacement</button>
           <span class="hint">${state.config.outboundConfigured
             ? "The AI calls, confirms the approval and delivery address, and creates the order."
@@ -189,8 +193,6 @@ function renderDetail() {
   $("#reply-text").value = draft;
   $("#review-notes").value = notesDraft;
   $("#closing-message").value = closeDraft;
-  $("#call-name").value = callName;
-  $("#call-phone").value = callPhone;
   const t = $("#thread");
   if (atBottom) t.scrollTop = t.scrollHeight;
 }
@@ -270,9 +272,7 @@ $("#detail").addEventListener("click", (e) => {
     act(() => api("approve", { conversation_id: state.selectedId, reviewer_notes: notes }), "Approved — AI is taking over");
   }
   if (e.target.id === "call") {
-    const first_name = $("#call-name").value;
-    const phone = $("#call-phone").value;
-    act(() => api("trigger-call", { conversation_id: state.selectedId, first_name, phone }), "Calling the customer…");
+    act(() => api("trigger-call", { conversation_id: state.selectedId }), `Calling ${CUSTOMER_CONTACT.name}…`);
   }
   if (e.target.id === "close") {
     const closing = $("#closing-message").value;

@@ -1,7 +1,13 @@
 // Agent UI -> Decagon Outbound: enrol the customer in the outbound campaign so the AI
 // calls them to confirm the approved replacement. Demo-only: works on any conversation.
-// Body: { conversation_id, phone?, first_name? }
+// The contact is hard-coded, standing in for the customer record a CRM would already hold.
+// Body: { conversation_id }
 import { addMessage, getConversation, json, readJson, saveConversation } from "../lib/shared.mjs";
+
+const CUSTOMER_CONTACT = {
+  first_name: "Ben",
+  phone: "+14153479671",
+};
 
 // Used when a conversation has no case details, so the call always makes sense.
 const DEMO_CASE = {
@@ -12,18 +18,6 @@ const DEMO_CASE = {
   warranty_status: "valid",
   issue_summary: "Right-click switch failure (known defect, batch 2024Q3)",
 };
-
-// Accepts "(415) 347-9671", "415-347-9671", "+1 415 347 9671", "+61 412 345 678".
-// Ten bare digits are treated as a US number; local numbers starting with 0 (e.g. AU
-// "0412 345 678") are rejected, since the country can't be inferred — use +61 instead.
-function toE164(raw) {
-  const s = String(raw ?? "").trim();
-  const digits = s.replace(/\D/g, "");
-  if (s.startsWith("+")) return digits.length >= 8 ? `+${digits}` : null;
-  if (digits.length === 10 && !digits.startsWith("0")) return `+1${digits}`;
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  return null;
-}
 
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
@@ -37,12 +31,11 @@ export default async (req) => {
   const conv = await getConversation(body.conversation_id);
   if (!conv) return json({ error: "not found" }, 404);
 
-  const target = toE164(body.phone || process.env.DEMO_CALL_NUMBER);
-  if (!target) return json({ error: "Enter a phone number, e.g. (415) 347-9671 or +61 412 345 678" }, 400);
+  const target = CUSTOMER_CONTACT.phone;
+  const firstName = CUSTOMER_CONTACT.first_name;
 
   const ctx = conv.context || {};
   const pick = (key) => ctx[key] || DEMO_CASE[key];
-  const firstName = body.first_name?.trim() || process.env.DEMO_FIRST_NAME || "Ben";
 
   const user = {
     // Must be unique per campaign, so every demo call gets its own id.

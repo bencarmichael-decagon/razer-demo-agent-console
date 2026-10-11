@@ -30,9 +30,10 @@ Outbound call button (optional):
 | Variable | Required | What it is |
 |---|---|---|
 | `OUTBOUND_MISSION_ID` | to enable the button | Campaign ID (`msn_…`) from Outbound → Campaigns → Configuration |
-| `DEMO_CALL_NUMBER` | no | Number called when the phone field is blank, e.g. `+14153479671`. Only a masked version is shown in the UI |
-| `DEMO_FIRST_NAME` | no | Pre-fills the name field (default `Ben`) |
 | `DECAGON_PHONE_NUMBER` | no | Caller number (E.164). If unset, the campaign's configured number is used |
+
+The customer contact (Ben, +1 415 347 9671) is hard-coded in `trigger-call.mjs`, with a
+display copy in `agent.js`, standing in for the record a CRM would already hold.
 
 With `DECAGON_WEBHOOK_MODULE_ID` blank, replies, approvals and closes are recorded
 in the console but not sent to Decagon. The header pill shows which mode you're in.
@@ -54,7 +55,7 @@ Called by the console (server-side functions forward to Decagon with the Bearer 
 | `POST /api/approve` `{ conversation_id, reviewer_notes? }` | `{ action: "approve_evidence", conversation_id, decision: "approved", reviewer_notes }` |
 | `POST /api/close` `{ conversation_id, closing_message?, resolution_summary? }` | `{ action: "close_conversation", conversation_id, closing_message, resolution_summary }` |
 
-Outbound: `POST /api/trigger-call` `{ conversation_id, first_name?, phone? }` enrols the
+Outbound: `POST /api/trigger-call` `{ conversation_id }` enrols the
 customer in the outbound campaign via `POST {DECAGON_BASE_URL}/mission_user/external/batch`.
 It works on any conversation (demo-only). Metadata uses the same `escalation_*` keys as the
 chat flow, plus `first_name`, `outbound_reason: "evidence_approved_follow_up"` and
