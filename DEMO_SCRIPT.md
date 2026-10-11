@@ -59,7 +59,7 @@ Lines in `code` are typed exactly as shown. "AI" lines are what the agent should
 |---|---|---|---|---|
 | 9 | Chat | `Thanks! Roughly how long does the review take?` | The AI does **not** reply. The message appears in the **console** thread. | "The customer stays in the same chat window. Their messages now go to the human." |
 | 10 | Console | Reply: `Hi! I'm reviewing your photos now, this will only take a minute.` → **Send** | The reply appears in the chat from **Razer Support Specialist**. | "The human writes in their own tool and the customer sees it in the same thread. No new chat, no new ticket." |
-| 11 | Console | Reviewer notes: `Cord fully severed, device and serial label visible. Approved.` → **Approve & hand back to AI** | The console status changes to **Back with AI**. | "One click. The decision is written onto the conversation, and the AI takes over again." |
+| 11 | Console | Reply: `All approved, handing you back now!` → **Send**. Then reviewer notes: `Cord fully severed, device and serial label visible. Approved.` → **Approve & hand back to AI** | The reply appears in the chat, and the console status changes to **Back with AI**. | "One click. The decision is written onto the conversation, and the AI takes over again." |
 
 ### Act 4: the AI finishes the job (~1.5 min)
 
@@ -82,8 +82,8 @@ Lines in `code` are typed exactly as shown. "AI" lines are what the agent should
 | 8 | Photos load in the console | The Decagon file URLs need a login to view. The console shows the link instead of the image, so the site would need to fetch them itself. |
 | 9 | The customer's message appears in the console | The On User Message integration (`cdm_3KRouIX0INyA57ohEkfdC7mX8mf`), or the conversation wasn't escalated. |
 | 10 | The reply appears in the chat | The webhook integration (`cdm_3KRoRqJEQ6wwJEsde4EjlBhRwfO`): the module ID or API key in Netlify, or the conversation lookup. The console shows an error message if Decagon rejects the call. |
-| 12 | The AI speaks first after Approve | `trigger_ai_flow()` didn't run, or the Post-Approval entry criteria didn't match `evidence_review_status = approved`. |
-| 13 | **The AI answers the address** (it doesn't land in the console) | **The main risk.** The conversation is still marked as handed to the custom integration, so later messages go to the console. Fix: a relay fallback in the site, about 15 lines. |
+| 12 | The AI speaks first after Approve | `trigger_ai_flow()` didn't run, or the AI stayed in Connect to Agent. Connect to Agent now checks `get_escalation_context` and switches to Post-Approval when `evidence_review_status` is approved. Sending a human message just before Approve (step 11) helps the switch. |
+| 13 | **The AI answers the address**, and the console thread shows **"Relayed to AI"** | The conversation stays escalated, so the console relays each customer message (`resume_ai` → `trigger_ai_flow()`). If you see "AI relay failed: …", the webhook rejected it. If the AI says the specialist is "still reviewing", it didn't see the approval (see step 12). |
 | 13 | The replacement is created without asking for the product or region again | `initiate_replacement` reads `region` from the transcript. If the AI asks again, just answer. |
 
 ## Recovery lines (if something stalls live)
