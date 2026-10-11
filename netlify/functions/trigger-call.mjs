@@ -9,6 +9,10 @@ const CUSTOMER_CONTACT = {
   phone: "+14153479671",
 };
 
+// Decagon-provisioned caller number. The batch API requires it per user
+// ("users[0] must include sender or decagon_phone_number").
+const DECAGON_CALLER_NUMBER = "+12294902462";
+
 // Used when a conversation has no case details, so the call always makes sense.
 const DEMO_CASE = {
   product: "Razer Viper V3 Pro",
@@ -42,6 +46,7 @@ export default async (req) => {
     user_id: `${conv.id}-${Date.now()}`,
     target,
     target_type: "PHONE",
+    decagon_phone_number: DECAGON_CALLER_NUMBER,
     metadata: {
       outbound_reason: "evidence_approved_follow_up",
       first_name: firstName,
@@ -57,7 +62,6 @@ export default async (req) => {
       reviewer_notes: "Cord fully severed, device and serial label visible. Approved.",
     },
   };
-  if (process.env.DECAGON_PHONE_NUMBER) user.decagon_phone_number = process.env.DECAGON_PHONE_NUMBER;
 
   const base = process.env.DECAGON_BASE_URL || "https://au.api.decagon.ai";
   const res = await fetch(`${base}/mission_user/external/batch`, {

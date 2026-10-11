@@ -30,10 +30,10 @@ Outbound call button (optional):
 | Variable | Required | What it is |
 |---|---|---|
 | `OUTBOUND_MISSION_ID` | to enable the button | Campaign ID (`msn_…`) from Outbound → Campaigns → Configuration |
-| `DECAGON_PHONE_NUMBER` | no | Caller number (E.164). If unset, the campaign's configured number is used |
 
 The customer contact (Ben, +1 415 347 9671) is hard-coded in `trigger-call.mjs`, with a
-display copy in `agent.js`, standing in for the record a CRM would already hold.
+display copy in `agent.js`, standing in for the record a CRM would already hold. The caller
+number (+1 229 490 2462) is hard-coded there too; the batch API requires it on every user.
 
 With `DECAGON_WEBHOOK_MODULE_ID` blank, replies, approvals and closes are recorded
 in the console but not sent to Decagon. The header pill shows which mode you're in.
