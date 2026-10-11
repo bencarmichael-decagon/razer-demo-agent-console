@@ -45,6 +45,11 @@ Called by the console (server-side functions forward to Decagon with the Bearer 
 | `POST /api/approve` `{ conversation_id, reviewer_notes? }` | `{ action: "approve_evidence", conversation_id, decision: "approved", reviewer_notes }` |
 | `POST /api/close` `{ conversation_id, closing_message?, resolution_summary? }` | `{ action: "close_conversation", conversation_id, closing_message, resolution_summary }` |
 
+Relay: when a customer message reaches `/api/user-message` for a conversation that's
+back with the AI (after Approve), the site sends `{ action: "resume_ai", conversation_id }`
+so the webhook integration calls `mgr.trigger_ai_flow()`. Decagon can't de-escalate a
+custom-integration conversation, so this keeps the AI answering.
+
 Console-only: `GET /api/conversations`, `GET /api/conversations?id=…`, `POST /api/reset`, `GET /api/status`.
 
 ## Simulate Decagon without Decagon
